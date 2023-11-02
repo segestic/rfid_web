@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RFID Reader</title>
+    <script>
+        async function connect() {
+            try {
+                const port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 });
+                const reader = new TextDecoderStream();
+                port.readable.pipeTo(reader.writable);
+                const readerStream = reader.readable;
+                const readerReader = readerStream.getReader();
+
+                while (true) {
+                    const { value, done } = await readerReader.read();
+                    if (done) break;
+                    const text = new TextDecoder().decode(value);
+                    console.log(`RFID Tag ID: ${text}`);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>RFID Reader</h1>
+    <button onclick="connect()">Connect to RFID Reader</button>
+</body>
+</html>
+
